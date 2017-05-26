@@ -6,25 +6,40 @@ sudo docker network rm $(docker network ls | grep "ovs" | awk '/ / { print $1 }'
 
 # Create docker network bridges
 
-sudo docker network create -d bridge --subnet=192.168.0.0/24 --gateway=192.168.0.254 ovs_a
-sudo docker network create -d bridge --subnet=192.168.1.0/24 --gateway=192.168.1.254 ovs_b
-sudo docker network create -d bridge --subnet=192.168.2.0/24 --gateway=192.168.2.254 ovs_c
+# sudo docker network create -d bridge --subnet=192.168.0.0/24 --gateway=192.168.0.254 ovs_a
+#sudo docker network create -d bridge --subnet=192.168.1.0/24 --gateway=192.168.1.254 ovs_b
+#sudo docker network create -d bridge --subnet=192.168.2.0/24 --gateway=192.168.2.254 ovs_c
 
 #Setting up namespace runtime dir
 sudo mkdir -p /var/run/netns
 
 # Creating ubuntu 16.04 containers
 sudo docker run --rm --name backbone -t -d gns3/ipterm
-sudo docker run --rm --name isp --network none -td gns3/ipterm
-sudo docker run --rm --name natA --net=ovs_a --ip 192.168.0.1 -td --cap-add=NET_ADMIN imadhsissou/networking-toolbox
-sudo docker run --rm --name natB --net=ovs_b --ip 192.168.1.1 -td --cap-add=NET_ADMIN imadhsissou/networking-toolbox
-sudo docker run --rm --name gtw --net=ovs_c --ip 192.168.2.1 -td gns3/ipterm
+sudo docker run --rm --name isp --net=none -td gns3/ipterm
+sudo docker run --rm --name natA --net=none -td --cap-add=NET_ADMIN imadhsissou/networking-toolbox
+sudo docker run --rm --name natB --net=none -td --cap-add=NET_ADMIN imadhsissou/networking-toolbox
+sudo docker run --rm --name gtw --net=none -td gns3/ipterm
 
-sudo docker run --rm --name host1 --net=ovs_a --ip 192.168.0.10 -td gns3/ipterm
-sudo docker run --rm --name host2 --net=ovs_a --ip 192.168.0.20 -td gns3/ipterm
+sudo docker run --rm --name host1 --net=none -td gns3/ipterm
+sudo docker run --rm --name host2 --net=none -td gns3/ipterm
 
-sudo docker run --rm --name host4 --net=ovs_b --ip 192.168.1.10 -td gns3/ipterm
-sudo docker run --rm --name www --net=ovs_c --ip 192.168.2.10 -td gns3/ipterm
+sudo docker run --rm --name host4 --net=none -td gns3/ipterm
+sudo docker run --rm --name www --net=none -td gns3/ipterm
+
+# Creating Open vSwitches
+
+# OVS_A
+sudo /vagrant/pipework/pipework ovs_a natA 192.168.0.254/24 2>/dev/null
+sudo /vagrant/pipework/pipework ovs_a host1 192.168.0.10/24@192.168.0.254 2>/dev/null
+sudo /vagrant/pipework/pipework ovs_a host2 192.168.0.20/24@192.168.0.254 2>/dev/null
+
+# OVS_B
+sudo /vagrant/pipework/pipework ovs_b natB 192.168.1.254/24 2>/dev/null
+sudo /vagrant/pipework/pipework ovs_b host4 192.168.1.10/24@192.168.1.254 2>/dev/null
+
+# OVS_C
+sudo /vagrant/pipework/pipework ovs_c gtw 192.168.2.254/24 2>/dev/null
+sudo /vagrant/pipework/pipework ovs_c www 192.168.2.10/24@192.168.2.254 2>/dev/null
 
 function NATing {
 	# usage e.g. NATing CONTANER natA nat1
@@ -95,15 +110,10 @@ networkConf natB nat2 10.0.25.2/30 10.0.25.1
 
 networkConf gtw gtw1 10.0.20.2/30 10.0.20.1
 
-# hostGW host1 192.168.0.1
-# hostGW host2 192.168.0.1
+NATing natA nat1
+NATing natB nat2
 
-# hostGW host4 192.168.1.1
-
-# hostGW www 192.168.2.1
-
-#NATing natA nat1
-#NATing natB nat2
-
-sudo docker exec natA traceroute 10.0.20.2
-sudo docker exec host1 traceroute 10.0.20.2
+# natA / natB are working fine.
+# add natC device to mask 192.168.2.0/24 network : add iptables rules to allow services
+# get started in services configuration ==> find a way to connect all containers to the internet (docker0 bridge)
+# without destroying the current config !!!
