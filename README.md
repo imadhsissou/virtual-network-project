@@ -1,7 +1,7 @@
 # SDN project
 This is a learning Project, an Introduction to Software Defined Networking & DevOps
 
-NOTE 1 : everything is automated, from building docker images to advanced network configuration, you'll be able to create this entire network with only ONE command `vagrant up`
+NOTE 1 : everything is automated, from building docker images to advanced network configuration, you'll be able to create this entire network with only ONE command : `vagrant up`
 
 For now the Network looks like this : (no services yet)
 
@@ -33,4 +33,5 @@ For now the Network looks like this : (no services yet)
 * HTTP   — port 80
 * HTTPS  — port 443
 
-3) no idea what to do next
+3) no idea what to do next,
+   any suggestions ? ping me at imad.hsissou@edu.uca.ma or fb.com/imadhsissou
