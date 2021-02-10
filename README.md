@@ -1,5 +1,5 @@
 # Virtual Network Project
-This is multi-purpose project to experiment with Docker, SDN and Linux Networking
+This is multi-purpose project to experiment with Docker, ~~SDN~~ and Linux Networking
 
 NOTE 1 : everything is automated, from building docker images to advanced network configuration, you'll be able to create this entire network with only ONE command : `vagrant up`
 
